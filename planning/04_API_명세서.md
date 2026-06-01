@@ -555,7 +555,7 @@ Terminal Daemon (host)  ↔  Channel  ↔  Client (desktop/web/mobile)
 | 암호화 | E2E. 릴레이/중계자는 내용 복호화 불가 |
 | 권한 분리 | 디바이스별 `read_only` / `approve` / `full` (기본 `read_only`) |
 | 출력 마스킹 | 원격 스트리밍 출력에도 Secret/PII 마스킹 적용 |
-| 위험 게이트 | High 명령 원격 승인은 옵션, **Critical·외부 부작용 MCP 도구는 원격 승인 기본 금지** |
+| 위험 게이트 | High 명령 원격 승인은 옵션이나 **기본 차단**(`allow_remote_approval_for_high_risk=false`, §30-13), **Critical·외부 부작용 MCP 도구는 원격 승인 기본 금지** |
 | 감사 | 모든 원격 액션을 디바이스 ID와 함께 감사 로그 기록 |
 | 폐기 | 세션 타임아웃, 디바이스 즉시 revoke, 키 유출 시 회전 |
 
