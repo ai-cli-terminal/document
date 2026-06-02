@@ -163,7 +163,7 @@ MVP는 신뢰도를 표시만 하고, 자동 실행 게이팅은 Phase 2.
 
 ```text
 $ ai run "src의 console.log 전부 제거"
-... applied (txn: 7f3a). Undo available for 24h.
+... applied (txn: 7f3a). Undo available for 7 days.
 $ ai undo
 Reverting txn 7f3a: 3 files restored from backup.
 ```
@@ -174,7 +174,7 @@ Reverting txn 7f3a: 3 files restored from backup.
 [undo]
 enabled = true
 backup_path = "~/.local/share/ai-terminal/undo"
-retention_hours = 24
+backup_ttl_days = 7            # 정본: §31.6
 use_trash_for_delete = true
 prefer_git_stash = true
 ```
@@ -249,7 +249,7 @@ respect_context_hash = true
 
 **설계**:
 
-- **보존 기간**: 세션 로그·캐시·undo는 짧게(기본 세션 30일, undo 24h), 히스토리는 길게(기본 365일) 분리 운영. 경과분은 자동 정리.
+- **보존 기간**: 세션 로그·캐시는 짧게(기본 세션 30일, 캐시 1일), undo 백업은 7일(§31.6), 히스토리는 길게(기본 365일) 분리 운영. 경과분은 자동 정리.
 - **At-rest 암호화**: 히스토리 DB·세션 로그·캐시를 OS 키링(또는 사용자 패스프레이즈) 기반 키로 암호화. 키는 디스크 평문 저장 금지.
 - **삭제 권리**: `ai history --purge --before <date>`, `ai forget <session>`로 사용자가 데이터를 영구 삭제. 조직 정책으로 강제 보존/강제 삭제 설정 가능.
 - **엔트로피 기반 시크릿 탐지 보완**: 정규식이 못 잡는 고엔트로피 토큰을 휴리스틱으로 추가 탐지하고, 탐지 불확실 시 **fail-closed**(원격 전송 차단).
@@ -259,7 +259,7 @@ respect_context_hash = true
 session_log_retention_days = 30
 history_retention_days = 365
 cache_retention_days = 1
-undo_retention_hours = 24
+undo_retention_hours = 168     # = 7일, 정본 §31.6 backup_ttl_days=7
 encrypt_at_rest = true
 key_source = "os_keyring"     # os_keyring | passphrase
 allow_right_to_delete = true
@@ -409,9 +409,11 @@ high_contrast = false
 
 > **MVP 정본**: 위 가중치는 *방법론*을 보이는 예시다. 실제 MVP에서 확정된 점수 체계는 **§31.4의 0~100 스케일**(Low 0~24 / Medium 25~49 / High 50~79 / Critical 80~100)과 그 점수 규칙·경로 가중치·완화 요소를 사용한다. 위험도는 deterministic해야 하며, AI 분류는 보조 신호이고 로컬 규칙 점수가 우선한다.
 
+아래 Preview Pane 예시는 위 *개념용* 0~7 합산이 아니라 **MVP 정본인 §31.4의 0~100 스케일**로 표기한다(독자가 §29.15에만 진입해도 실제 점수 체계를 보게 하기 위함).
+
 ```text
-Risk: High (score 5)
-+3 recursive delete, +3 wildcard target, -1 scoped to ./build
+Risk: Medium (score 35/100)
++30 recursive delete, +15 broad target, -10 path scoped to project
 Affected: ~1,240 files under ./build
 ```
 

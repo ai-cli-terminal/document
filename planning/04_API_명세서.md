@@ -102,6 +102,7 @@ Next: 실행 Enter / 수정 e / 취소 Ctrl+C
 ````
 
 - 삭제·변경 명령은 반드시 **영향 범위**를 설명한다.
+- **확인 affordance는 2단계다.** 명령 *생성* 응답은 `Next: 실행 Enter / 수정 e / 취소 Ctrl+C`(소프트 제안)로 끝난다. 실제 *실행 게이트*에서 변경/위험(Medium 이상) 명령은 별도의 명시적 확인 `Execute?`/`Apply? [y/N]`을 거친다.
 - 위험도는 색 + 텍스트 라벨 + 아이콘으로 중복 인코딩(`[HIGH]`, `⚠`)하여 색에만 의존하지 않는다(`→ 05 §29.14`).
 - 신뢰도(confidence)가 낮으면 "확신 낮음" 배지를 함께 표시한다(`→ 05 §29.3`).
 
@@ -130,8 +131,8 @@ Next: 실행 Enter / 수정 e / 취소 Ctrl+C
 위험도는 deterministic 해야 하며 **로컬 규칙 점수가 우선**, AI 분류는 보조 신호다. 규칙 점수와 AI 분류가 불일치하면 **더 높은 쪽을 채택**(보수적). 점수와 기여 요소를 Preview Pane에 표시한다.
 
 ```text
-Risk: High (score 5)
-+3 recursive delete, +3 wildcard target, -1 scoped to ./build
+Risk: Medium (score 35/100)
++30 recursive delete, +15 broad target, -10 path scoped to project
 Affected: ~1,240 files under ./build
 ```
 
@@ -342,8 +343,8 @@ Command:
 Explanation:
 - ./node_modules 디렉터리와 그 하위 전체를 재귀 삭제합니다.
 - 경로가 현재 프로젝트 내부로 한정되어 있습니다.
-Risk: Medium (score 5) — [⚠ MEDIUM]
-  +3 recursive delete, +3 wildcard target, -1 scoped to ./node_modules
+Risk: Medium (score 35/100) — [⚠ MEDIUM]
+  +30 recursive delete, +15 broad target, -10 path scoped to project
 Affected: ~28,400 files under ./node_modules
 Reason: Deletes a large dependency directory, but path is scoped.
 Execute? [y/N]

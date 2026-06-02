@@ -60,9 +60,10 @@ include_stdout_lines = 100
 include_stderr_lines = 200
 allow_for_high_risk_commands = false
 
-[ai.cache]                    # §29.6
+[ai.cache]                    # §29.6 (이 블록은 §29.6 전체 키의 정본 superset)
 enabled = true
 semantic_cache = true
+semantic_threshold = 0.92
 ttl_seconds = 86400
 respect_context_hash = true
 
@@ -86,15 +87,20 @@ mask_phone_number = true
 mask_national_id = true
 mask_location = false
 
-[security.retention]          # §29.8
+[security.retention]          # §29.8 (이 블록은 §29.8 전체 키의 정본 superset)
 session_log_retention_days = 30
 history_retention_days = 365
+cache_retention_days = 1
+undo_retention_hours = 168    # = 7일, 정본 §31.6 backup_ttl_days=7
 encrypt_at_rest = true
+key_source = "os_keyring"     # os_keyring | passphrase
 allow_right_to_delete = true
 
 [sandbox]
 enabled = true
-backend = "container"         # tmpdir | container | bubblewrap | gvisor | firecracker
+backend = "auto"              # auto | tmpdir | container | bubblewrap | gvisor | firecracker
+# auto = container runtime 가용 시 container, 아니면 tmpdir(§15: tmpdir=MVP, container=MVP+).
+# 샌드박스 실패 시 비격리 실제 실행으로 자동 전환하지 않는다(§16.2 fail-safe).
 network = false
 read_only_root = true
 user_namespace = true
@@ -416,9 +422,9 @@ AI Terminal Doctor
 Shell:   bash 5.2 detected
 PTY:     OK
 AI provider: remote provider reachable
-Sandbox: container backend available / user namespace enabled / no-new-privileges enabled
+Sandbox: backend=auto → container detected / user namespace enabled / no-new-privileges enabled
 Policy:  active profile: balanced
-Masking: secret rules 18 loaded / pii rules 7 loaded
+Masking: secret rules 3 loaded / pii rules 3 loaded
 Context: cwd synchronized / git branch synchronized
 ```
 

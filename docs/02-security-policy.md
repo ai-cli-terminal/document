@@ -161,46 +161,35 @@ rules:
 [policies]
 default_profile = "balanced"
 available_profiles = ["paranoid", "balanced", "poweruser", "dev"]
+# paranoid·balanced = MVP 필수 / poweruser·dev = Phase 2 확장
 
-[profiles.paranoid]
-confirm_level = "all_ai"
-sandbox_all_ai_commands = true
-block_remote_ai = true
-show_context_scope_before_remote_call = true
-max_context_tokens = 8000
-auto_execute = false
-auto_healing = false
-mask_pii = true
-mask_secrets = true
-block_on_masking_failure = true
+# MVP 필수 프로파일(balanced·paranoid)의 권위 있는 전체 필드값은 §31.3에 정의한다.
+# 드리프트 방지를 위해 여기서는 중복 정의하지 않는다(키 이름도 §31.3의 allow_remote_ai 기준).
+# 아래는 Phase 2 확장 프로파일 예시다.
 
-[profiles.balanced]
-confirm_level = "medium_and_above"
-sandbox_high_risk_commands = true
-block_remote_ai = false
-show_context_scope_before_remote_call = "when_sensitive"
-max_context_tokens = 32000
-auto_execute = false
-auto_healing = true
-mask_pii = true
-mask_secrets = true
-
-[profiles.poweruser]
+[profiles.poweruser]   # Phase 2
 confirm_level = "high_and_above"
+block_critical = true
 sandbox_high_risk_commands = false
-block_remote_ai = false
+allow_remote_ai = true
 show_context_scope_before_remote_call = false
 max_context_tokens = 64000
 auto_execute = false
 auto_healing = true
+remote_approval = false
 
-[profiles.dev]
+[profiles.dev]         # Phase 2
 confirm_level = "medium_and_above"
+block_critical = true
 sandbox_high_risk_commands = true
 preview_file_modifications = true
+allow_remote_ai = true
 auto_healing = true
 max_context_tokens = 32000
+remote_approval = false
 ```
+
+> 키 이름 규약: 프로파일은 `allow_remote_ai`(허용 기준)를 쓴다. §12.3 조직 정책의 `[ai] block_remote_ai`는 조직 차원 **강제 차단(deny override)** 으로, 프로파일 설정을 덮어쓰는 별도 의미다.
 
 전환 명령: `ai policy show` / `ai policy set <profile>`.
 
