@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>remote-approval PWA — C v2 (Cockpit · 위험도 대형 · 한국어)</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; padding:32px 24px 80px; background:#e9eaed;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; color:#1a1a1a; }
+  h1 { font-size:19px; margin:0 0 4px; }
+  .sub { color:#6b7280; font-size:13px; margin:0 0 24px; }
+  .phone { width:390px; height:800px; border-radius:40px; overflow:hidden;
+    box-shadow:0 18px 50px rgba(0,0,0,.22); border:10px solid #0a0a0a; }
+  .screen { width:100%; height:100%; overflow-y:auto; }
+  .screen::-webkit-scrollbar { width:0; }
+
+  .vC { background:#0b0f14; color:#cfe3f2; font-family:"Segoe UI",system-ui,sans-serif; padding:16px 16px 22px; }
+  .hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;
+    font-size:11px; letter-spacing:1.5px; color:#5f7d96; }
+  .lights { display:flex; gap:12px; }
+  .lt { display:flex; align-items:center; gap:5px; font-size:10px; color:#7c98ad; letter-spacing:1px; }
+  .lt::before { content:""; width:8px; height:8px; border-radius:50%; }
+  .lt.ok::before { background:#2ec36b; box-shadow:0 0 7px #2ec36b; }
+  .lt.warn::before { background:#f5a623; box-shadow:0 0 7px #f5a623; }
+
+  /* ===== 위험도 대형 링 게이지 (focal point) ===== */
+  .gauge { position:relative; width:230px; height:230px; margin:6px auto 4px; }
+  .gauge svg { transform:rotate(-90deg); }
+  .gnum { position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; }
+  .gnum .n { font-size:84px; font-weight:800; color:#f5a623; line-height:.9; letter-spacing:-3px; }
+  .gnum .of { font-size:15px; color:#5f7d96; margin-top:2px; letter-spacing:1px; }
+  .gnum .lvl { font-size:14px; font-weight:700; color:#f5a623; letter-spacing:3px; margin-top:6px; }
+  .glabel { text-align:center; font-size:11px; letter-spacing:3px; color:#5f7d96; margin-bottom:16px; }
+
+  .panel { background:#10171f; border:1px solid #1d2935; border-radius:10px; padding:13px; margin-bottom:12px; }
+  .ptitle { font-size:10px; letter-spacing:2px; color:#5f7d96; margin-bottom:9px; }
+  .cmd { font-family:ui-monospace,monospace; color:#ff8f8f; font-size:16px; word-break:break-all; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 12px; font-size:13px; }
+  .grid div span { color:#5f7d96; display:block; font-size:10px; letter-spacing:1px; margin-bottom:1px; }
+  .grid div b { color:#cfe3f2; font-weight:600; }
+  .grid .warn b { color:#f5a623; }
+  .rb { display:flex; align-items:center; gap:8px; font-size:12px; margin:6px 0; }
+  .rb i { width:96px; font-style:normal; color:#7c98ad; }
+  .rb .blk { height:9px; border-radius:2px; }
+  .rb b { margin-left:auto; color:#cfe3f2; font-weight:600; }
+  .adv { font-size:11px; color:#5f7d96; border-left:2px solid #1d2935; padding-left:9px; margin:6px 0 16px; line-height:1.5; }
+  .btns { display:flex; gap:10px; }
+  .btn { flex:1; padding:17px; border-radius:9px; text-align:center; font-weight:700; font-size:15px; letter-spacing:2px; }
+  .reject { border:1px solid #2a3b4a; color:#cfe3f2; }
+  .approve { background:#1f7a44; color:#eafff1; }
+  .auth { text-align:center; color:#5f7d96; font-size:11px; margin-top:11px; letter-spacing:1px; }
+</style>
+</head>
+<body>
+<h1>remote-approval — PWA 승인 화면 · C v2</h1>
+<p class="sub">Cockpit 방향 · 위험도 링 게이지로 대형화 · 전 UI 한국어 통일. 내용 동일(rm -rf ./build · 35/100 · 데몬 online).</p>
+
+<div class="phone"><div class="screen vC">
+  <div class="hdr"><span>승인 · 실행 / 차단</span>
+    <div class="lights"><span class="lt ok">데몬</span><span class="lt warn">변경됨</span></div>
+  </div>
+
+  <!-- 위험도 대형 게이지 -->
+  <div class="gauge">
+    <svg width="230" height="230" viewBox="0 0 230 230">
+      <circle cx="115" cy="115" r="100" fill="none" stroke="#1d2935" stroke-width="16"/>
+      <circle cx="115" cy="115" r="100" fill="none" stroke="#f5a623" stroke-width="16"
+        stroke-linecap="round" stroke-dasharray="628.3"
+        stroke-dashoffset="408.4"/>
+    </svg>
+    <div class="gnum">
+      <div class="n">35</div>
+      <div class="of">/ 100</div>
+      <div class="lvl">보통</div>
+    </div>
+  </div>
+  <div class="glabel">위험도</div>
+
+  <div class="panel"><div class="ptitle">실행하려는 명령</div><div class="cmd">rm -rf ./build</div></div>
+
+  <div class="panel"><div class="ptitle">머신 상태</div>
+    <div class="grid">
+      <div><span>호스트</span><b>devbox</b></div>
+      <div><span>브랜치</span><b>main</b></div>
+      <div><span>경로</span><b>/home/user/app</b></div>
+      <div class="warn"><span>Git</span><b>변경 3건</b></div>
+      <div><span>컨테이너</span><b>없음</b></div>
+      <div><span>AWS_KEY</span><b>****</b></div>
+    </div>
+  </div>
+
+  <div class="panel"><div class="ptitle">위험도 분해</div>
+    <div class="rb"><i>재귀 삭제</i><div class="blk" style="width:54%;background:#f5a623"></div><b>+30</b></div>
+    <div class="rb"><i>광범위 대상</i><div class="blk" style="width:27%;background:#e0972b"></div><b>+15</b></div>
+    <div class="rb"><i>경로 한정</i><div class="blk" style="width:18%;background:#2ec36b"></div><b>−10</b></div>
+  </div>
+
+  <div class="adv">안내(advisory)입니다. 강제력은 best-effort이며, 데몬이 꺼지면 가드레일도 꺼집니다.</div>
+
+  <div class="btns"><div class="btn reject">거부</div><div class="btn approve">승인</div></div>
+  <div class="auth">승인하려면 생체인증이 필요합니다</div>
+</div></div>
+</body>
+</html>

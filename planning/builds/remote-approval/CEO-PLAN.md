@@ -38,6 +38,15 @@ Review chain: office-hours (DESIGN APPROVED) → Codex eng (17 findings) → eng
 ## NOT in scope
 다중 디바이스·권한 분리 · Critical 원격 승인(§30-13) · 관리형 릴레이(§30-12) · iOS Web Push 백그라운드 · 사업성 검증 · #3 결과 승인(이번 사이클 deferred)
 
+## PWA 승인 화면 디자인 레퍼런스 (design-shotgun 2026-06-02)
+승인 방향: **C v2 "Cockpit"** (5개 방향 탐색 — Terminal / Boarding Pass / Cockpit / Editorial / Bold Safety 중). 목업: [`pwa-approval-mockup.html`](./pwa-approval-mockup.html) (브라우저로 열어 확인).
+- 위험도 0~100이 화면 focal point: 링 게이지 + 초대형 숫자 + 등급 라벨("보통")
+- 머신 상태 텔레메트리 그리드(호스트/브랜치/경로/Git/컨테이너), Git 변경 = amber 경고
+- #1 위험도 분해 막대(재귀삭제 +30 / 광범위 +15 / 경로한정 −10), #2 데몬 online + 변경됨 상태 라이트
+- #8 advisory 톤("안내입니다, 강제력은 best-effort"), 승인 시 생체인증(WebAuthn) 명시
+- 전 UI 한국어 통일 (승인/거부/실행·차단/위험도/머신 상태)
+- 미제작 상태 변형(stale 경고 / Critical=local-only / 데몬 오프라인 / timeout)은 구현 시 같은 문법으로 확장.
+
 ## Cross-Model Record
 - Outside voice (Codex gpt-5.5): #1·#3 컷 권고, #3="별도 프로젝트". 최대 feasibility 위험 = 인터셉트 제어점(M0). "approval"→"advisory" 권고.
 - 결정: #3 defer(합의), #1 keep(유저, UX delight), #8 reframe(합의).
