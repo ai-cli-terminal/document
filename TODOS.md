@@ -29,3 +29,9 @@ Deferred work tracked from reviews. Each item has enough context to pick up cold
 - **Why:** §29가 이미 budget/guardrail 푸시를 언급 — 플랫폼 잠재력.
 - **Cons / 주의:** 학습 일회성에 대한 **과설계(premature abstraction) 위험.** M2 릴레이가 돈 뒤, 두 번째 이벤트 타입이 실제로 필요해질 때 일반화하라(YAGNI).
 - **Effort:** human L / CC ~half-day · **Priority:** P3 · **Depends on:** M2 relay
+
+### T-RA5 — 심층 hook-health 검증 (heartbeat가 강제력을 진짜 증명)  [P3]
+- **What:** heartbeat가 데몬 도달뿐 아니라 셸 hook이 *실제 강제 중*임을 증명: hook 설치/활성, PATH-우선, 현재 셸에서 인터셉트 활성, 활성 셸 수, 마지막 인터셉트 시각.
+- **Why:** plan-eng-review(2026-06-02) cross-model 발견 — heartbeat는 데몬-프로세스-도달만 증명하지 "가드레일 ON"을 증명 못 함. M1은 최소 hook-health 필드(마지막 체크인)만 포함하기로 결정(D5); 심층 검증은 여기로 defer.
+- **Cons:** 셸별·OS별 hook 상태 introspection이 까다로움(특히 다중 셸/PATH 변조 탐지).
+- **Effort:** human M / CC ~2-3h · **Priority:** P3 · **Depends on:** M1 heartbeat(최소판)

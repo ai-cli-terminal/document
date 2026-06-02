@@ -36,7 +36,35 @@ Design: DESIGN.md (신뢰할 수 있는 원격 승인 — M1: 데몬+PWA 직결)
 - 마스킹 baseline §31.8: 룰별 + private key block → 원격 차단
 - revoke / replay / TOCTOU 거부: 세 보안 음성 케이스 모두 통과 필수
 
+## 확장 스코프 테스트 (CEO review 2026-06-02 — #1 viz / #2 heartbeat / #4 arm TTL)
+M1-after-floor에 얹는 확장. 베어 M1 보안 게이트 green 후 추가.
+
+**#2 데몬 heartbeat (Noise 세션 재사용 — 별도 채널 아님)**
+- **채널 lifecycle 먼저 정의**(M1 sprawl 방지): 승인 트랜잭션 밖에서도 사는 idle Noise 세션 = persistent + reconnecting(rekey/revoke 처리 포함). 테스트: idle 세션 유지, 재접속, rekey, revoke 후 세션 무효.
+- heartbeat emit (인터셉트 hot path 비탑재, 데몬→폰)
+- **라벨 정직성(cross-model)**: heartbeat는 *데몬 도달*만 증명 — "가드레일 OFF" 단정 금지. 표현은 **"데몬 도달 불가 / 상태 불명"**. 데몬이 아는 한의 **최소 hook-health 필드**(마지막 hook 체크인 시각) 포함; PATH-우선·셸 수 심층 검증은 defer(TODO).
+- **transport-stale vs daemon-unhealthy 구분**: 폰 PWA 백그라운드 suspend·배터리세이버·captive-wifi로 false-stale 발생 → "폰이 잤음(transport)"과 "데몬 보고 불건강"을 UI에서 분리(경고 무시 학습 방지).
+- 폰 stale 감지: 10s ping / 30s cutoff (freshness는 데몬 발행 sequence/세션 기준, 폰 wall-clock 아님)
+- [→E2E] 데몬 kill → cutoff 내 폰 "도달 불가" 표시
+- 데몬 alive-but-wedged(승인 루프 멈춤) → 상태 필드가 반영하는지(프로세스-alive ≠ 건강)
+- 미인증/위조/replay/순서 heartbeat → 무시, 디바이스 identity 바인딩 (음성 케이스)
+
+**#4 arm TTL (monotonic + 불확실 시 fail-closed)**
+- `ai remote arm --for 30m|2h` → monotonic 만료 시 auto-disarm
+- [CRITICAL] 만료가 승인 왕복 중 발생 → fail-closed = 차단 (폰이 승인 표시 후에도 데몬 거부 가능 → **거부 사유 명시 + 테스트**)
+- **suspend/resume·hibernate·VM-pause 시맨틱**(진짜 지뢰, 점프 아님): 슬립 2h가 30m arm 창에 포함되는지 OS별(Win/Linux/macOS) 상이 → 모호하면 만료 처리(fail-closed)
+- `--for` 파싱 강화: 30m/2h 정상 + **0/음수/오버플로/이상단위/중복플래그 거부**, 캡 ≤4h 초과 거부
+- armed 중 데몬 재시작 → disarm(안전측) + **폰에 "재시작 후 disarm됨" 표시**(침묵 disarm 아님)
+
+**#1 위험도 분해 viz (PWA 렌더)**
+- **데몬-서명 risk facts 사용**(PWA 재계산 금지 → 정책 drift 방지): payload에 점수 버전·factor ID·표시 라벨 바인딩
+- §31.4 기여요소를 막대로 렌더(+30/+15/−10), **최종 차단 상태·임계선 보존**(음수 factor가 위험 명령을 "균형있어" 보이게 하지 않게)
+- stale 컨텍스트 → 막대에 경고 오버레이 (freshness=데몬 sequence 기준)
+- Critical/blocked payload → "local-only" 상태 — **데몬이 원격 승인 거부(UI-only 숨김 아님), §30-13**
+- 퇴화 데이터: 0 요소 / 음수 완화만 / 매우 긴 요소 목록 / 구 policy 버전 렌더
+
 ## 비범위 (M1)
 - 독립 릴레이("암호문만 중계" E2E 증명) → M2
+- #3 결과 승인(diff preview) → deferred(TODOS, 3-모델 합의), 별도 마일스톤
 - 다중 디바이스·권한 분리(read_only/approve/full) → 비범위
 - 네이티브 앱 / iOS Web Push 백그라운드 신뢰성 → 비범위(데모는 Android/데스크톱 PWA)
